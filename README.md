@@ -6,36 +6,37 @@ Given the tools, the user's request and the agent's proposed tool calls, the mod
 
 | | |
 |---|---|
-| Model | [grounded-ai/agent-decision-9b](https://huggingface.co/grounded-ai/agent-decision-9b): LoRA adapter and calibrated head for [Cloudflare/clef-flash](https://huggingface.co/Cloudflare/clef-flash) |
+| 9B model | [grounded-ai/agent-decision-9b](https://huggingface.co/grounded-ai/agent-decision-9b): LoRA adapter and calibrated head for [Cloudflare/clef-flash](https://huggingface.co/Cloudflare/clef-flash) (Apache-2.0) |
+| 3B model | [grounded-ai/agent-decision-3b](https://huggingface.co/grounded-ai/agent-decision-3b): LoRA adapter and calibration for [LiquidAI/d1-3B](https://huggingface.co/LiquidAI/d1-3B) (LFM Open License v1.0) |
 | Test data | [grounded-ai/agent-decision-eval](https://huggingface.co/datasets/grounded-ai/agent-decision-eval) |
-| Showcase | [`notebooks/showcase_agent_decision_9b.ipynb`](notebooks/showcase_agent_decision_9b.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/grounded-ai/agent-decision/blob/main/notebooks/showcase_agent_decision_9b.ipynb) |
+| Showcases | 9B: [`showcase_agent_decision_9b.ipynb`](notebooks/showcase_agent_decision_9b.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/grounded-ai/agent-decision/blob/main/notebooks/showcase_agent_decision_9b.ipynb) · 3B: [`showcase_agent_decision_3b.ipynb`](notebooks/showcase_agent_decision_3b.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/grounded-ai/agent-decision/blob/main/notebooks/showcase_agent_decision_3b.ipynb) |
 | Dataset builder | [`notebooks/01_build_decision_dataset.ipynb`](notebooks/01_build_decision_dataset.ipynb) |
-
-A 3B model on [LiquidAI/d1-3B](https://huggingface.co/LiquidAI/d1-3B), trained the same way, is next.
+| Collection | [System One models](https://huggingface.co/collections/grounded-ai/system-one-models-6acc15d4b0d942380fbb242c) |
 
 ## Results
 
-1,139 test rows from APIs never seen in training, with a fixed number of rows per kind of example. Same rows for both models.
+1,139 test rows from APIs never seen in training, with a fixed number of rows per kind of example. Same rows for every model; base models zero-shot.
 
-| Question | Clef-flash (zero-shot) | agent-decision-9b |
-|---|---|---|
-| Are the calls correct? | 68.0% | **98.1%** |
-| What is wrong with them? | 56.2% | **96.4%** |
-| Call, ask or decline? | 60.6% | **88.2%** |
-| All | 63.3% | **95.3%** |
+| Question | Clef-flash | agent-decision-9b | d1-3B | agent-decision-3b |
+|---|---|---|---|---|
+| Are the calls correct? | 68.0% | **98.1%** | 86.2% | **98.3%** |
+| What is wrong with them? | 56.2% | **96.4%** | 75.3% | **96.4%** |
+| Call, ask or decline? | 60.6% | **88.2%** | 69.7% | **85.4%** |
+| All | 63.3% | **95.3%** | 79.5% | **94.8%** |
+| Calibration error | 0.166 | **0.014** | 0.018 | **0.011** |
 
-91% of agent-decision-9b's answers come with 90%+ confidence, and 97.7% of those are right (Clef-flash: 37%, of which 75% are right). Expected calibration error drops from 0.166 to 0.014.
+At 90%+ confidence: agent-decision-9b answers 91% of decisions and 97.7% of those are right; agent-decision-3b answers 86% and 99.1% are right. The 3B matches the 9B on checking tool calls; the 9B is better at "ask the user for missing information" (81% vs 69%).
 
 "Are the calls correct?" by kind of mistake:
 
-| Kind | Clef-flash | agent-decision-9b |
-|---|---|---|
-| Correct calls | 97.3% | 97.3% |
-| A parameter the tool does not define | 22.0% | **100%** |
-| A value the user gave is missing | 45.0% | **97.0%** |
-| A value differs from what the user asked | 72.2% | **96.5%** |
-| The wrong tool | 85.3% | **100%** |
-| One of several requested calls is missing | 87.8% | **96.3%** |
+| Kind | Clef-flash | agent-decision-9b | d1-3B | agent-decision-3b |
+|---|---|---|---|---|
+| Correct calls | 97.3% | 97.3% | 97.3% | 96.7% |
+| A parameter the tool does not define | 22.0% | **100%** | 64.0% | **99.3%** |
+| A value the user gave is missing | 45.0% | **97.0%** | 91.0% | **99.0%** |
+| A value differs from what the user asked | 72.2% | **96.5%** | 92.4% | **97.2%** |
+| The wrong tool | 85.3% | **100%** | 96.7% | **100%** |
+| One of several requested calls is missing | 87.8% | **96.3%** | 70.7% | **97.6%** |
 
 ## How the data is made
 
@@ -51,10 +52,10 @@ Every label is exact and nothing is truncated:
 ## Limitations
 
 - Wrong calls are exact edits of correct calls: certain to be wrong, but possibly easier to spot than the mistakes real agents make. Treat the results as an upper bound until measured on real agent errors.
-- "Ask the user for missing information" is the weakest decision, especially in unfamiliar layouts (44% on the held-out markdown layout).
+- "Ask the user for missing information" is the weakest decision, especially in unfamiliar layouts (on the held-out markdown layout: 44% for the 9B, 52% for the 3B).
 - A call with a parameter the tool does not define counts as wrong.
-- Needs a GPU with bfloat16 and about 24 GB (L4 or larger).
+- Both need a GPU with bfloat16; an L4 runs either.
 
 ## License
 
-Code: MIT. Model: Apache-2.0, like Clef-flash. Data: CC-BY-4.0, derived from Salesforce xLAM function-calling and NVIDIA When2Call.
+Code: MIT. agent-decision-9b: Apache-2.0, like Clef-flash. agent-decision-3b: LFM Open License v1.0, like d1-3B (commercial use licensed only below US$10M annual revenue). Data: CC-BY-4.0, derived from Salesforce xLAM function-calling and NVIDIA When2Call.
