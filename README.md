@@ -2,7 +2,7 @@
 
 Fast, calibrated decision models for AI agents, from [grounded-ai](https://huggingface.co/grounded-ai).
 
-Given the tools, the user's request and the agent's proposed tool calls, the model answers typed questions (*are these calls correct?*, *what is wrong with them?*, *should the agent call a tool, ask the user, or decline?*) with a probability for every allowed answer, in one forward pass and without generating text. It is built to be the cheap first stage of an evaluation cascade: confident answers are accepted, the rest go to an LLM judge.
+Given the tools, the user's request and the agent's proposed tool calls, the model answers typed questions (*are these calls correct?*, *what is wrong with them?*, *should the agent call a tool, ask the user, or decline?*) with a probability for every allowed answer, in one forward pass and without generating text. Use it anywhere an agent's step needs a fast, calibrated check: as a hook that vets tool calls before they run (like the grounding check in [`grounded_ai`](https://github.com/grounded-ai/grounded_ai)'s Claude Code plugin), as a guardrail that stops an agent from acting on a confidently wrong call, for labelling or filtering agent traces, or as the cheap first stage of an evaluation cascade where only low-confidence decisions go to an LLM judge.
 
 | | |
 |---|---|
