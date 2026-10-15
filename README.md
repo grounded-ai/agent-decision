@@ -27,7 +27,7 @@ DECIDER_BACKEND=clef python serve/decision_server.py     # agent-decision-9b
 from grounded_ai import Evaluator, CascadeEvaluator
 
 decide = Evaluator("systemone/agent-decision-9b", base_url="http://127.0.0.1:8765")
-cascade = CascadeEvaluator(jev=decide, judge="anthropic/claude-sonnet-4-6", min_confidence=0.7)
+cascade = CascadeEvaluator(decision_model=decide, judge="anthropic/claude-sonnet-4-6", min_confidence=0.7)
 ```
 
 [`grounded-ai compare`](https://github.com/grounded-ai/grounded_ai#choose-a-decision-model-on-your-own-data) measures it against other decision models on your own labelled data.
