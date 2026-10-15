@@ -6,7 +6,7 @@ Given the tools, the user's request and what the agent is about to do, the model
 
 | | |
 |---|---|
-| 9B model | [grounded-ai/agent-decision-9b](https://huggingface.co/grounded-ai/agent-decision-9b): LoRA adapter and calibrated head for [Cloudflare/clef-flash](https://huggingface.co/Cloudflare/clef-flash) (Apache-2.0) |
+| 9B model | [grounded-ai/agent-decision-9b](https://huggingface.co/grounded-ai/agent-decision-9b): LoRA adapter and calibrated head for [Cloudflare/clef-flash](https://huggingface.co/Cloudflare/clef-flash) (Apache-2.0). Version 2 (October 2026); the first release is at `revision="v1"` |
 | 3B model | [grounded-ai/agent-decision-3b](https://huggingface.co/grounded-ai/agent-decision-3b): LoRA adapter and calibration for [LiquidAI/d1-3B](https://huggingface.co/LiquidAI/d1-3B) (LFM Open License v1.0). Version 2 (October 2026); the first release is at `revision="v1"` |
 | Test data | [grounded-ai/agent-decision-eval](https://huggingface.co/datasets/grounded-ai/agent-decision-eval) |
 | Showcases | 9B: [`showcase_agent_decision_9b.ipynb`](notebooks/showcase_agent_decision_9b.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/grounded-ai/agent-decision/blob/main/notebooks/showcase_agent_decision_9b.ipynb) · 3B: [`showcase_agent_decision_3b.ipynb`](notebooks/showcase_agent_decision_3b.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/grounded-ai/agent-decision/blob/main/notebooks/showcase_agent_decision_3b.ipynb) |
@@ -15,31 +15,32 @@ Given the tools, the user's request and what the agent is about to do, the model
 
 ## Results
 
-### agent-decision-3b, version 2
+### Version 2 (October 2026)
 
-2,255 test rows from APIs, tasks, suites and scenarios never seen in training ([agent-decision-eval](https://huggingface.co/datasets/grounded-ai/agent-decision-eval)), with a fixed number of rows per kind of example. Same rows for every model; base zero-shot; "v1" is the 3B's first release.
+2,255 test rows from APIs, tasks, suites and scenarios never seen in training ([agent-decision-eval](https://huggingface.co/datasets/grounded-ai/agent-decision-eval)), with a fixed number of rows per kind of example. Same rows for every model; base models zero-shot; "v1" is each model's first release. Both version 2 models are trained on the same rows.
 
-| Question | d1-3B | 3B v1 | **3B v2** |
-|---|---|---|---|
-| Is this tool call a correct next step? (AgentDojo, τ-bench) | 73.4% | 63.7% | **87.7%** |
-| Is the response supported by the context? | 90.0% | 85.4% | **93.8%** |
-| Call, ask or decline? | 65.2% | 78.4% | **81.8%** |
-| Call a tool or not? | 88.6% | 91.1% | **93.7%** |
-| Are the calls correct? | 86.0% | **98.2%** | 96.7% |
-| What is wrong with them? | 77.9% | **96.6%** | 94.9% |
-| All | 78.8% | 88.7% | **91.9%** |
+| Question | d1-3B | 3B v1 | **3B v2** | Clef-flash | 9B v1 | **9B v2** |
+|---|---|---|---|---|---|---|
+| Is this tool call a correct next step? (AgentDojo, τ-bench) | 73.4% | 63.7% | 87.7% | 66.9% | 63.4% | **90.0%** |
+| Is the response supported by the context? | 90.0% | 85.4% | 93.8% | 83.1% | 83.8% | **96.2%** |
+| Call, ask or decline? | 65.2% | 78.4% | 81.8% | 61.2% | 82.1% | **86.4%** |
+| Call a tool or not? | 88.6% | 91.1% | **93.7%** | 88.6% | 87.3% | 91.1% |
+| Are the calls correct? | 86.0% | **98.2%** | 96.7% | 69.4% | 97.6% | 97.4% |
+| What is wrong with them? | 77.9% | 96.6% | 94.9% | 58.3% | 96.6% | **97.0%** |
+| All | 78.8% | 88.7% | 91.9% | 66.3% | 89.0% | **93.9%** |
 
-- On AgentDojo's held-out banking suite, v2 lets 90.9% of correct steps through (v1: 30.9%) and catches 80.9% of actions planted by prompt injection (v1: 75.5%).
-- Calibration error 0.010. At 90%+ confidence v2 answers 75% of decisions, and 98.3% of those are right.
-- v1 is still better at exact tool-call edits: a missing user value (99.3% vs 90.8%) and a dropped call (97.6% vs 88.0%). On v1's own test set (below): v1 94.8%, v2 94.1%.
+- On AgentDojo's held-out banking suite, the 9B v2 catches 90.9% of actions planted by prompt injection and lets 85.5% of correct steps through (3B v2: 80.9% and 90.9%). On τ-bench it catches 90.8% of wrong-target steps (3B v2: 86.2%).
+- Calibration error: 9B v2 0.006, 3B v2 0.010. At 90%+ confidence the 9B v2 answers 84% of decisions and 98.3% of those are right; the 3B v2 answers 75%, also 98.3% right.
+- On the first releases' own test set (below): 9B v2 96.6% (9B v1 95.3%); 3B v2 94.1% (3B v1 94.8%: the 3B's first release is still better at exact tool-call edits such as a missing user value, 99.3% vs 90.8%).
+- In a replay of 66 recorded agent calls from unseen tasks, with the hook's tool-call questions: AUC 0.87 for the 9B v2, 0.85 for the 3B v2, 0.83 for both first releases. A small sample.
 
-Full tables, per kind of example, are in the [model card](https://huggingface.co/grounded-ai/agent-decision-3b).
+Full tables, per kind of example, are in the model cards: [9B](https://huggingface.co/grounded-ai/agent-decision-9b), [3B](https://huggingface.co/grounded-ai/agent-decision-3b).
 
-### agent-decision-9b and the 3B's first release
+### The first releases
 
 1,139 test rows of xLAM and When2Call from APIs never seen in training ([agent-decision-eval v1](https://huggingface.co/datasets/grounded-ai/agent-decision-eval/tree/v1)), with a fixed number of rows per kind of example. Same rows for every model; base models zero-shot.
 
-| Question | Clef-flash | agent-decision-9b | d1-3B | 3B v1 |
+| Question | Clef-flash | 9B v1 | d1-3B | 3B v1 |
 |---|---|---|---|---|
 | Are the calls correct? | 68.0% | **98.1%** | 86.2% | **98.3%** |
 | What is wrong with them? | 56.2% | **96.4%** | 75.3% | **96.4%** |
@@ -47,11 +48,11 @@ Full tables, per kind of example, are in the [model card](https://huggingface.co
 | All | 63.3% | **95.3%** | 79.5% | **94.8%** |
 | Calibration error | 0.166 | **0.014** | 0.018 | **0.011** |
 
-At 90%+ confidence: agent-decision-9b answers 91% of decisions and 97.7% of those are right; the 3B's first release answers 86% and 99.1% are right. The 3B matches the 9B on checking tool calls; the 9B is better at "ask the user for missing information" (81% vs 69%).
+At 90%+ confidence: the 9B's first release answers 91% of decisions and 97.7% of those are right; the 3B's first release answers 86% and 99.1% are right. The 3B matches the 9B on checking tool calls; the 9B is better at "ask the user for missing information" (81% vs 69%).
 
 "Are the calls correct?" by kind of mistake:
 
-| Kind | Clef-flash | agent-decision-9b | d1-3B | 3B v1 |
+| Kind | Clef-flash | 9B v1 | d1-3B | 3B v1 |
 |---|---|---|---|---|
 | Correct calls | 97.3% | 97.3% | 97.3% | 96.7% |
 | A parameter the tool does not define | 22.0% | **100%** | 64.0% | **99.3%** |
@@ -74,10 +75,10 @@ To rebuild: run each module in [`builders/`](builders) (the usage line is at the
 ## Limitations
 
 - Most wrong tool calls are exact edits of correct calls: certain to be wrong, but possibly easier to spot than the mistakes real agents make. The AgentDojo and τ-bench rows are real agent behaviour.
-- Declining on unfamiliar multi-turn scenarios (60.6% for the 3B v2) and asking for missing information (73.4%) are the weakest decisions.
-- Injected actions are caught about 81% of the time on an unseen suite: a strong signal, not a complete defence.
+- Call, ask or decline is the weakest question: the 3B v2 declines on unfamiliar multi-turn scenarios 60.6% of the time it should (9B v2: 80.3%), and the 9B v2 asks for information when it should just call the tool more often than the base model does (it calls when it should 86.9% of the time, Clef-flash 96.1%).
+- Injected actions are caught 81% (3B v2) and 91% (9B v2) of the time on an unseen suite: a strong signal, not a complete defence.
 - A call with a parameter the tool does not define counts as wrong.
-- Both need a GPU with bfloat16; an L4 runs either.
+- Both need a GPU with bfloat16; an L4 runs either (the 9B needs about 24 GB, the 3B about 6 GB).
 
 ## License
 
