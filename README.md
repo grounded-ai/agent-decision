@@ -11,7 +11,26 @@ Given the tools, the user's request and what the agent is about to do, the model
 | Test data | [grounded-ai/agent-decision-eval](https://huggingface.co/datasets/grounded-ai/agent-decision-eval) |
 | Showcases | 9B: [`showcase_agent_decision_9b.ipynb`](notebooks/showcase_agent_decision_9b.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/grounded-ai/agent-decision/blob/main/notebooks/showcase_agent_decision_9b.ipynb) · 3B: [`showcase_agent_decision_3b.ipynb`](notebooks/showcase_agent_decision_3b.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/grounded-ai/agent-decision/blob/main/notebooks/showcase_agent_decision_3b.ipynb) |
 | Dataset builder | [`builders/`](builders) (one module per trace source) and [`notebooks/01_build_decision_dataset.ipynb`](notebooks/01_build_decision_dataset.ipynb) |
+| Serve | [`serve/decision_server.py`](serve/decision_server.py): either model at the standard `POST /v1/systemone` API |
 | Collection | [System One models](https://huggingface.co/collections/grounded-ai/system-one-models-6acc15d4b0d942380fbb242c) |
+
+## Use it
+
+Serve either model at `POST /v1/systemone`, the API decision models share, and call it from anything that speaks it:
+
+```bash
+python serve/decision_server.py                          # agent-decision-3b on 127.0.0.1:8765 (an L4 is plenty)
+DECIDER_BACKEND=clef python serve/decision_server.py     # agent-decision-9b
+```
+
+```python
+from grounded_ai import Evaluator, CascadeEvaluator
+
+decide = Evaluator("systemone/agent-decision-9b", base_url="http://127.0.0.1:8765")
+cascade = CascadeEvaluator(jev=decide, judge="anthropic/claude-sonnet-4-6", min_confidence=0.7)
+```
+
+[`grounded-ai compare`](https://github.com/grounded-ai/grounded_ai#choose-a-decision-model-on-your-own-data) measures it against other decision models on your own labelled data.
 
 ## Results
 
